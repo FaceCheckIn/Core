@@ -38,9 +38,9 @@ while (time.time() - start_time) <= 5 and webcam_on:
     #     font = cv2.FONT_HERSHEY_DUPLEX
     #     cv2.putText(frame, "nothing", (50, 50), font, 1.0, (0, 0, 0), 1)
 
-    cv2.imshow('Video', frame)
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+    # cv2.imshow('Video', frame)
+    # if cv2.waitKey(1) & 0xFF == ord('q'):
+    #     break
 
 video_capture.release()
 cv2.destroyAllWindows()
