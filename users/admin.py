@@ -10,26 +10,25 @@ class CustomUserAdmin(UserAdmin):
     model = CustomUser
     readonly_fields = ("date_joined", "last_login")
     list_display = (
-        "email", "is_active", "is_staff", "is_superuser")
+        "identification_code", "is_active", "is_staff", "is_superuser")
     list_filter = ("is_staff", "is_active", "is_superuser")
     fieldsets = (
         ('Personal Information', {
-         "fields": ("email", "first_name", "last_name", "password")}),
+         "fields": ("identification_code", "first_name", "last_name", "password", "image1", "image2", "role")}),
         ("Permissions", {"fields": (
-            "is_active", "is_staff", "is_superuser", "is_show_email",
-            "groups", "user_permissions")}),
+            "is_active", "is_staff", "is_superuser", "groups", "user_permissions")}),
         ("Date and Time", {
          "fields": ("last_login", "date_joined")}),
     )
     add_fieldsets = (
         ('Personal Information', {
             "classes": ("wide",),
-            "fields": ("email", "first_name", "last_name", "password1", "password2")}),
+            "fields": ("identification_code", "first_name", "last_name", "password1", "password2")}),
         ("Permissions", {"fields": (
             "is_active", "is_staff", "is_superuser", "groups", "user_permissions")}),
     )
-    search_fields = ("email",)
-    ordering = ("email",)
+    search_fields = ("identification_code",)
+    ordering = ("identification_code",)
 
 
 admin.site.register(CustomUser, CustomUserAdmin)
