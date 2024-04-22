@@ -73,9 +73,3 @@ class ChangePasswordSerializer(serializers.Serializer):
         user = self.validated_data["user"]
         user.set_password(self.validated_data["new_password"])
         user.save()
-
-
-class UpdateDestroyAccountSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CustomUser
-        fields = "__all__"
