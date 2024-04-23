@@ -7,7 +7,7 @@ user_messages = {
     "identification_code_exists": "This identification code was taken.",
     "identification_invalid": "This identification code is invalid.",
     "equal_passwords": "Your new_password and confirm password isn't equal.",
-    "successful_change_password": "Your password changed.",
+    "successful_change_password": "User's password changed.",
     "wrong_password": "Your input password is incorrect.",
 }
 
