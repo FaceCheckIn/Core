@@ -7,7 +7,10 @@ from .utils import get_user_messages, is_valid_iran_code
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ("identification_code", "first_name", "last_name", "role")
+        fields = (
+            "id", "identification_code", "first_name", "last_name", "role",
+            "is_active", "is_staff", "is_superuser",
+        )
 
 
 class LoginSerializer(serializers.Serializer):
@@ -49,13 +52,14 @@ class RegisterSerializer(serializers.Serializer):
         user = CustomUser.objects.create(**validated_data)
         user.set_password(password)
         user.save()
+        return user
 
 
 class ChangePasswordSerializer(serializers.Serializer):
+    superuser_password = serializers.CharField(write_only=True)
     user = serializers.PrimaryKeyRelatedField(
         queryset=CustomUser.objects.all()
     )
-    superuser_password = serializers.CharField(write_only=True)
     new_password = serializers.CharField(write_only=True)
     confirm_password = serializers.CharField(write_only=True)
 
