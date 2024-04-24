@@ -3,8 +3,6 @@ import face_recognition
 import time
 
 
-
-
 def detection():
     video_capture = cv2.VideoCapture(0)
     webcam_on = True
@@ -18,26 +16,25 @@ def detection():
         rgb_frame = frame[:, :, ::-1]
 
         face_locations = face_recognition.face_locations(rgb_frame)
-        face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
+        face_encodings = face_recognition.face_encodings(
+            rgb_frame, face_locations)
 
-        #check for did a face detect? if len >0 it means that yes! it detected
+        # check for did a face detect? if len >0 it means that yes! it detected
         if len(face_encodings) > 0:
             detected_time = time.time()
             last_capture_time = time.time()
-            
+
             while (time.time() - detected_time) <= 3.5:
                 if time.time() - last_capture_time >= 0.5:
-                    #capture one image and pass to backend. in code below it captures one image and save to directory
+                    # capture one image and pass to backend. in code below it captures one image and save to directory
                     # cv2.imwrite(f"captured_image_{time.time()}.jpg", frame)
                     ret, frame = video_capture.read()
                     faces.append(frame)
                     last_capture_time = time.time()
                 if (time.time() - detected_time) >= 3.5:
                     webcam_on = False
-                    break  
+                    break
 
-                    
-        
     # else:
     #     font = cv2.FONT_HERSHEY_DUPLEX
     #     cv2.putText(frame, "nothing", (50, 50), font, 1.0, (0, 0, 0), 1)
