@@ -21,8 +21,9 @@ def encode_known_faces(image_paths, names):
 
 def recognition(detected_face, employees_faces):
     # load face and names from data base
-    # employees_face=[]
-    # employees_name=[]
+    # employees_face = ["images.jpg", "images 3.jpg",
+    #                   "newme.jpeg", "Dr.Eskandari.jpg"]
+    # employees_name = ["CR7", "Messi", "Mostafa", "DrEskandari"]
     encode_known_faces(employees_face, employees_name)
     matches = face_recognition.compare_faces(
         emloyees_face_encodings, detected_face)
