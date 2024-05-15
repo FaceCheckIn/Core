@@ -36,8 +36,8 @@ def detection():
             while (time.time() - detected_time) <= 3.5:
                 if time.time() - last_capture_time >= 0.5:
                     # capture one image and pass to backend. in code below it captures one image and save to directory
-                    filename = f"captured_image_{int(time.time() - start_time)}.jpg"
-                    pil_image.save(filename)
+                    # filename = f"captured_image_{int(time.time() - start_time)}.jpg"
+                    # pil_image.save(filename)
                     frame = proc.get_next_data()
                     faces.append(frame)
                     last_capture_time = time.time()
