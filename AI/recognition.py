@@ -26,4 +26,5 @@ def recognition(input_image, employees_faces, employees_identification_codes):
     if True in matches:
         match_index = np.argmin(faceDis)
         name = employees_face_names[match_index]
-    return True, name
+        return True, name
+    return False, name
