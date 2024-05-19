@@ -22,9 +22,9 @@ def recognition(input_image, employees_faces, employees_identification_codes):
         employees_face_encodings, input_image)
     faceDis = face_recognition.face_distance(
         employees_face_encodings, input_image)
-    name = "unknown"
+    identification_code = "unknown"
     if True in matches:
         match_index = np.argmin(faceDis)
-        name = employees_face_names[match_index]
-        return True, name
-    return False, name
+        identification_code = employees_face_names[match_index]
+        return True, identification_code
+    return False, identification_code
