@@ -21,7 +21,7 @@ class CustomUser(AbstractUser):
     objects = CustomUserManager()
 
     def __str__(self) -> str:
-        return self.email
+        return self.identification_code
 
     def update_login_time(self):
         self.last_login = timezone.now()
