@@ -21,15 +21,18 @@ def encode_known_faces(image_paths, names):
 
 def recognition(detected_face, employees_faces):
     # load face and names from data base
-    # employees_face = ["images.jpg", "images 3.jpg",
+    # employees_face = ["images.jpg", "images 3.jpg",s
     #                   "newme.jpeg", "Dr.Eskandari.jpg"]
     # employees_name = ["CR7", "Messi", "Mostafa", "DrEskandari"]
 
     encode_known_faces(employees_face, employees_name)
+    face_locations = face_recognition.face_locations(detected_face)
+    encoded_detecting = face_recognition.face_encodings(
+        detected_face, face_locations)
     matches = face_recognition.compare_faces(
-        emloyees_face_encodings, detected_face)
+        emloyees_face_encodings, encoded_detecting)
     faceDis = face_recognition.face_distance(
-        emloyees_face_encodings, detected_face)
+        emloyees_face_encodings, encoded_detecting)
     name = "unknown"
     if True in matches:
         match_index = np.argmin(faceDis)
