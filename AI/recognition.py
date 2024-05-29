@@ -15,19 +15,22 @@ def encode_known_faces(image_paths, identification_codes):
     return employees_face_encodings, employees_face_names
 
 
-def recognition(detected_face, employees_images: list, emp_identification_codes: list):
+def recognition(detected_face_path, employees_images, emp_identification_codes):
     employees_face_encodings, employees_face_names = encode_known_faces(
         employees_images, emp_identification_codes)
+    detected_face = face_recognition.load_image_file(detected_face_path)
     face_locations = face_recognition.face_locations(detected_face)
     encoded_detecting = face_recognition.face_encodings(
         detected_face, face_locations)
-    matches = face_recognition.compare_faces(
-        employees_face_encodings, encoded_detecting)
-    faceDis = face_recognition.face_distance(
-        employees_face_encodings, encoded_detecting)
-    identification_code = "unknown"
-    if True in matches:
-        match_index = np.argmin(faceDis)
-        identification_code = employees_face_names[match_index]
-        return True, identification_code
-    return False, identification_code
+
+    for encoding in encoded_detecting:
+        matches = face_recognition.compare_faces(
+            employees_face_encodings, encoding)
+        faceDis = face_recognition.face_distance(
+            employees_face_encodings, encoding)
+        if True in matches:
+            match_index = np.argmin(faceDis)
+            identification_code = employees_face_names[match_index]
+            return True, identification_code
+
+    return False, "unknown"
