@@ -10,5 +10,7 @@ class CreateTransaction(APIView):
             data=request.data, context={'request': request}
         )
         serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        response = serializer.save()
+        message = {
+            "status": response[0], "fullname": response[1]}
+        return Response(message, status=status.HTTP_201_CREATED)

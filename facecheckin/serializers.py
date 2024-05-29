@@ -3,6 +3,9 @@ from .models import Transaction
 from AI.recognition import recognition
 from users.models import CustomUser
 from django.utils import timezone
+from django.conf import settings
+from django.core.files.storage import FileSystemStorage
+import os
 
 
 class CreateTransactionSerializer(serializers.Serializer):
@@ -49,9 +52,12 @@ class CreateTransactionSerializer(serializers.Serializer):
 
     def save(self, **kwargs):
         image = self.validated_data["image1"]
+        fs = FileSystemStorage()
+        filename = fs.save(image.name, image)
+        image_path = os.path.join(settings.MEDIA_ROOT, filename)
         emp_images, emp_identification_codes = self.fetch_data_from_db()
         result, identification_code = self.recognition_process(
-            image, emp_images, emp_identification_codes)
+            image_path, emp_images, emp_identification_codes)
         if result is True:
             status = self.validated_data["status"]
             sentiment = self.sentiment_analysis_process()
