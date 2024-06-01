@@ -14,3 +14,8 @@ class CreateTransaction(APIView):
         message = {
             "status": response[0], "fullname": response[1]}
         return Response(message, status=status.HTTP_201_CREATED)
+
+
+class PingAPI(APIView):
+    def get(self, request):
+        return Response(status=status.HTTP_200_OK)
