@@ -1,6 +1,5 @@
-from emotion_recognition import emotion_recognition
+from .emotion_recognition import emotion_recognition
 from collections import Counter
-import cv2
 
 
 images = []

@@ -1,4 +1,3 @@
-import cv2
 import mediapipe as mp
 import math
 import numpy as np
@@ -183,5 +182,3 @@ def pth_processing(fp):
         img = torch.unsqueeze(img, 0)
         return img
     return get_img_torch(fp)
-
-
