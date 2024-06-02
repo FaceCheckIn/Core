@@ -4,9 +4,6 @@ import numpy as np
 import torch
 from PIL import Image
 from .neuralnet import *
-from django.conf import settings
-from django.core.files.storage import FileSystemStorage
-import os
 
 
 def set_network():
@@ -27,10 +24,7 @@ def set_network():
 
 
 def emotion_recognition(image):
-    fs = FileSystemStorage()
-    filename = fs.save(image.name, image)
-    image_path = os.path.join(settings.MEDIA_ROOT, filename)
-    image = cv2.imread(image_path, cv2.IMREAD_COLOR)
+    image = cv2.imread(image, cv2.IMREAD_COLOR)
     mp_face_mesh, pth_backbone_model, pth_LSTM_model, DICT_EMO = set_network()
     h, w, _ = image.shape
     with mp_face_mesh.FaceMesh(
