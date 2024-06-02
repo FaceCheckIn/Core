@@ -4,18 +4,21 @@ import numpy as np
 import torch
 from PIL import Image
 from .neuralnet import *
+from django.conf import settings
+from django.core.files.storage import FileSystemStorage
+import os
 
 
 def set_network():
     mp_face_mesh = mp.solutions.face_mesh
-    name_backbone_model = 'models/FER_static_ResNet50_AffectNet.pt'
+    name_backbone_model = 'AI/models/FER_static_ResNet50_AffectNet.pt'
     name_LSTM_model = 'Aff-Wild2'
     pth_backbone_model = ResNet50(7, channels=3)
     pth_backbone_model.load_state_dict(torch.load(name_backbone_model))
     pth_backbone_model.eval()
     pth_LSTM_model = LSTMPyTorch()
     pth_LSTM_model.load_state_dict(torch.load(
-        'models/FER_dinamic_LSTM_{0}.pt'.format(name_LSTM_model)))
+        'AI/models/FER_dinamic_LSTM_{0}.pt'.format(name_LSTM_model)))
     pth_LSTM_model.eval()
     DICT_EMO = {0: 'Neutral', 1: 'Happiness', 2: 'Sadness',
                 3: 'Surprise', 4: 'Fear', 5: 'Disgust', 6: 'Anger'}
@@ -24,6 +27,10 @@ def set_network():
 
 
 def emotion_recognition(image):
+    fs = FileSystemStorage()
+    filename = fs.save(image.name, image)
+    image_path = os.path.join(settings.MEDIA_ROOT, filename)
+    image = cv2.imread(image_path, cv2.IMREAD_COLOR)
     mp_face_mesh, pth_backbone_model, pth_LSTM_model, DICT_EMO = set_network()
     h, w, _ = image.shape
     with mp_face_mesh.FaceMesh(
