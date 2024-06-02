@@ -6,15 +6,16 @@ from django.utils import timezone
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
 import os
+from .tasks import get_emotion_recognition
 
 
 class CreateTransactionSerializer(serializers.Serializer):
     image1 = serializers.ImageField()
-    # image2 = serializers.ImageField()
-    # image3 = serializers.ImageField()
-    # image4 = serializers.ImageField()
-    # image5 = serializers.ImageField()
-    # image6 = serializers.ImageField()
+    image2 = serializers.ImageField()
+    image3 = serializers.ImageField()
+    image4 = serializers.ImageField()
+    image5 = serializers.ImageField()
+    image6 = serializers.ImageField()
     status = serializers.CharField()
 
     def validate_status(self, value):
@@ -36,21 +37,31 @@ class CreateTransactionSerializer(serializers.Serializer):
                 [data.identification_code, data.identification_code])
         return employees_images, emp_identification_codes
 
-    def create_transaction(self, identification_code: str, status: Transaction.TransactionStatus, sentiment: str):
+    def create_transaction(self, identification_code: str, status: Transaction.TransactionStatus):
         user = CustomUser.objects.get(identification_code=identification_code)
         status = Transaction.TransactionStatus.ENTER if status == "enter" else Transaction.TransactionStatus.EXIT
-        Transaction.objects.create(
-            user=user, sentiment=sentiment, status=status, datetime=timezone.now()
+        obj = Transaction.objects.create(
+            user=user, status=status, datetime=timezone.now()
         )
-        return "{} {}".format(user.first_name, user.last_name)
+        return "{} {}".format(user.first_name, user.last_name), obj.pk
 
     def recognition_process(self, input_image, employees_images: list, emp_identification_codes: list):
         return recognition(input_image, employees_images, emp_identification_codes)
 
-    def sentiment_analysis_process(self):
-        return "temp"
+    def sentiment_analysis_process(self, transaction_pk):
+        images = [self.validated_data[f"image{i+1}"] for i in range(6)]
+        get_emotion_recognition.delay(images, transaction_pk)
+
+    def print_images_name(self):
+        print(self.validated_data["image1"])
+        print(self.validated_data["image2"])
+        print(self.validated_data["image3"])
+        print(self.validated_data["image4"])
+        print(self.validated_data["image5"])
+        print(self.validated_data["image6"])
 
     def save(self, **kwargs):
+        self.print_images_name()
         image = self.validated_data["image1"]
         fs = FileSystemStorage()
         filename = fs.save(image.name, image)
@@ -60,8 +71,8 @@ class CreateTransactionSerializer(serializers.Serializer):
             image_path, emp_images, emp_identification_codes)
         if result is True:
             status = self.validated_data["status"]
-            sentiment = self.sentiment_analysis_process()
-            full_name = self.create_transaction(
-                identification_code, status, sentiment)
+            full_name, transaction_pk = self.create_transaction(
+                identification_code, status)
+            # self.sentiment_analysis_process(transaction_pk)
             return result, full_name
         return result, identification_code
