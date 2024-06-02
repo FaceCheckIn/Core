@@ -3,7 +3,7 @@ import mediapipe as mp
 import numpy as np
 import torch
 from PIL import Image
-from neuralnet import *
+from .neuralnet import *
 
 
 def set_network():
