@@ -6,6 +6,7 @@ ENV PYTHONUNBUFFERED 1
 # RUN apt-get update && apt-get upgrade
 # RUN apt-get update && apt-get install -y netcat
 RUN apt-get update && apt-get install -y cmake
+RUN apt-get update && apt-get install ffmpeg libsm6 libxext6  -y
 
 WORKDIR /code
 
