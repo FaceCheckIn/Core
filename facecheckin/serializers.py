@@ -7,6 +7,8 @@ from django.conf import settings
 from django.core.files.storage import FileSystemStorage
 import os
 from .tasks import get_emotion_recognition
+import threading
+import time
 
 
 class CreateTransactionSerializer(serializers.Serializer):
@@ -48,9 +50,20 @@ class CreateTransactionSerializer(serializers.Serializer):
     def recognition_process(self, input_image, employees_images: list, emp_identification_codes: list):
         return recognition(input_image, employees_images, emp_identification_codes)
 
-    def sentiment_analysis_process(self, transaction_pk):
-        images = [self.validated_data[f"image{i+1}"] for i in range(6)]
-        get_emotion_recognition.delay(images, transaction_pk)
+    def sentiment_analysis_process(self, transaction_pk, images_path: list):
+        get_emotion_recognition(images_path, transaction_pk)
+
+    def save_images(self):
+        images_path = []
+
+        for i in range(6):
+            fs = FileSystemStorage()
+            image = self.validated_data[f"image{i+1}"]
+            filename = fs.save(image.name, image)
+            image_path = os.path.join(settings.MEDIA_ROOT, filename)
+            images_path.append(image_path)
+
+        return images_path
 
     def print_images_name(self):
         print(self.validated_data["image1"])
@@ -62,6 +75,7 @@ class CreateTransactionSerializer(serializers.Serializer):
 
     def save(self, **kwargs):
         self.print_images_name()
+        images_path = self.save_images()
         image = self.validated_data["image1"]
         fs = FileSystemStorage()
         filename = fs.save(image.name, image)
@@ -73,6 +87,7 @@ class CreateTransactionSerializer(serializers.Serializer):
             status = self.validated_data["status"]
             full_name, transaction_pk = self.create_transaction(
                 identification_code, status)
-            # self.sentiment_analysis_process(transaction_pk)
+            threading.Thread(
+                target=self.sentiment_analysis_process, args=(transaction_pk, images_path)).start()
             return result, full_name
         return result, identification_code
