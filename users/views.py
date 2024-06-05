@@ -58,4 +58,13 @@ class ChangePassword(APIView):
 class UsersList(ListAPIView):
     permission_classes = (Is_Superuser,)
     serializer_class = UsersListSerializer
-    queryset = CustomUser.objects.all()
+
+    def get_queryset(self):
+        queryset = CustomUser.objects.all()
+
+        search_input = self.request.query_params.get("search", None)
+        if search_input is not None:
+            queryset = queryset.filter(
+                role__icontains=search_input)
+
+        return queryset
