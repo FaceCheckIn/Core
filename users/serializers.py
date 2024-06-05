@@ -2,6 +2,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from .models import CustomUser
 from .utils import get_user_messages, is_valid_iran_code
+from facecheckin.models import Transaction
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -77,3 +78,16 @@ class ChangePasswordSerializer(serializers.Serializer):
         user = self.validated_data["user"]
         user.set_password(self.validated_data["new_password"])
         user.save()
+
+
+class UsersListSerializer(serializers.ModelSerializer):
+    status = serializers.SerializerMethodField()
+
+    class Meta:
+        model = CustomUser
+        fields = (
+            "id", "identification_code", "first_name", "last_name",
+            "image1", "role", "status")
+
+    def get_status(self, obj):
+        return Transaction.objects.filter(user=obj).last().status

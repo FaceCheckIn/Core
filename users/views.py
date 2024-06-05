@@ -1,13 +1,14 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.generics import CreateAPIView
+from rest_framework.generics import CreateAPIView, ListAPIView
 from rest_framework.permissions import AllowAny
 from .permissions import Is_Superuser
 from .models import CustomUser
 from .utils import get_user_messages, get_tokens_for_user
 from .serializers import (
     LoginSerializer, ChangePasswordSerializer, UserSerializer, RegisterSerializer,
+    UsersListSerializer,
 )
 
 
@@ -52,3 +53,9 @@ class ChangePassword(APIView):
             message = {
                 "message": get_user_messages("successful_change_password")}
             return Response(message, status=status.HTTP_200_OK)
+
+
+class UsersList(ListAPIView):
+    permission_classes = (Is_Superuser,)
+    serializer_class = UsersListSerializer
+    queryset = CustomUser.objects.all()
