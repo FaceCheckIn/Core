@@ -2,13 +2,13 @@ from rest_framework import serializers
 from .models import Transaction
 from AI.recognition import recognition
 from users.models import CustomUser
-from django.utils import timezone
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
+from django.db.models import Count, F
+from django.db.models.functions import TruncDate
 import os
 from .tasks import get_emotion_recognition
 import threading
-import time
 
 
 class CreateTransactionSerializer(serializers.Serializer):
@@ -42,9 +42,7 @@ class CreateTransactionSerializer(serializers.Serializer):
     def create_transaction(self, identification_code: str, status: Transaction.TransactionStatus):
         user = CustomUser.objects.get(identification_code=identification_code)
         status = Transaction.TransactionStatus.ENTER if status == "enter" else Transaction.TransactionStatus.EXIT
-        obj = Transaction.objects.create(
-            user=user, status=status, datetime=timezone.now()
-        )
+        obj = Transaction.objects.create(user=user, status=status)
         return "{} {}".format(user.first_name, user.last_name), obj.pk
 
     def recognition_process(self, input_image, employees_images: list, emp_identification_codes: list):
@@ -91,3 +89,65 @@ class CreateTransactionSerializer(serializers.Serializer):
                 target=self.sentiment_analysis_process, args=(transaction_pk, images_path)).start()
             return result, full_name
         return result, identification_code
+
+
+class ActivityViewSerializer(serializers.Serializer):
+    user_id = serializers.IntegerField()
+    start_date = serializers.DateField()
+    end_date = serializers.DateField()
+
+    def validate_user_id(self, value):
+        if not CustomUser.objects.filter(pk=value).exists():
+            raise serializers.ValidationError("This user is not exists.")
+        return value
+
+    def sentiment_table(self, user_id: int, start_date, end_date, status):
+        objects = Transaction.objects.filter(
+            user__pk=user_id,
+            status=status,
+            created_at__range=(start_date, end_date),
+        ).values("sentiment").annotate(count=Count("sentiment"))
+
+        message = {
+            item['sentiment']: item['count'] for item in objects}
+
+        return message
+
+    def avg_hour_table(self, user_id: int, start_date, end_date, status):
+        transactions = Transaction.objects.filter(
+            user__pk=user_id,
+            status=status,
+            created_at__range=(start_date, end_date),
+        )
+
+        times = transactions.annotate(
+            date=TruncDate("created_at"),
+            time=F("created_at")
+        ).values("date", "time")
+
+        data = []
+        for time in times:
+            extracted_date = time["date"]
+            extracted_time = time["time"].time()
+            data.append({
+                "date": extracted_date,
+                "time": extracted_time
+            })
+
+        return data
+
+    def save(self, **kwargs):
+        user_id = self.validated_data["user_id"]
+        start_date = self.validated_data["start_date"]
+        end_date = self.validated_data["end_date"]
+
+        return {
+            "enter_sentiment_table": self.sentiment_table(
+                user_id, start_date, end_date, Transaction.TransactionStatus.ENTER),
+            "exit_sentiment_table": self.sentiment_table(
+                user_id, start_date, end_date, Transaction.TransactionStatus.EXIT),
+            "enter_avg_hour_table": self.avg_hour_table(
+                user_id, start_date, end_date, Transaction.TransactionStatus.ENTER),
+            "exit_avg_hour_table": self.avg_hour_table(
+                user_id, start_date, end_date, Transaction.TransactionStatus.EXIT),
+        }
