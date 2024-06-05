@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from .serializers import CreateTransactionSerializer, ActivityViewSerializer
 from users.permissions import Is_Superuser
+from rest_framework.permissions import IsAuthenticated
 
 
 class CreateTransaction(APIView):
@@ -24,7 +25,7 @@ class PingAPI(APIView):
         return Response(status=status.HTTP_200_OK)
 
 
-class ActivityView(APIView):
+class ActivityByManager(APIView):
     permission_classes = (Is_Superuser,)
 
     def post(self, request):
@@ -34,3 +35,10 @@ class ActivityView(APIView):
         serializer.is_valid(raise_exception=True)
         response = serializer.save()
         return Response(response, status=status.HTTP_200_OK)
+
+
+class ActivityByUser(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        return Response(status=status.HTTP_200_OK)
