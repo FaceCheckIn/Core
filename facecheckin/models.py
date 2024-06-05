@@ -11,7 +11,7 @@ class Transaction(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     sentiment = models.CharField(_("Sentiment"), null=True, blank=True)
     status = models.CharField(_("Status"), choices=TransactionStatus.choices)
-    datetime = models.DateTimeField(_("Datetime"))
+    created_at = models.DateTimeField(_("Created_at"), auto_now_add=True)
 
     def __str__(self) -> str:
         return self.user.identification_code
