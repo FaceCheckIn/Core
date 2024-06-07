@@ -78,13 +78,9 @@ class CreateTransactionSerializer(serializers.Serializer):
     def save(self, **kwargs):
         self.print_images_name()
         images_path = self.save_images()
-        image = self.validated_data["image1"]
-        fs = FileSystemStorage()
-        filename = fs.save(image.name, image)
-        image_path = os.path.join(settings.MEDIA_ROOT, filename)
         emp_images, emp_identification_codes = self.fetch_data_from_db()
         result, identification_code = self.recognition_process(
-            image_path, emp_images, emp_identification_codes)
+            images_path[0], emp_images, emp_identification_codes)
         if result is True:
             status = self.validated_data["status"]
             full_name, transaction_pk = self.create_transaction(
