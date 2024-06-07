@@ -32,7 +32,7 @@ class Login(APIView):
             return Response(message, status=status.HTTP_200_OK)
         else:
             message = {"Password": get_user_messages("password")}
-            return Response(message, status=status.HTTP_400_BAD_REQUEST)
+            return Response(message, status=status.HTTP_401_UNAUTHORIZED)
 
 
 class Register(CreateAPIView):
