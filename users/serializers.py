@@ -31,7 +31,7 @@ class RegisterSerializer(serializers.Serializer):
     last_name = serializers.CharField()
     role = serializers.CharField()
     image1 = serializers.ImageField()
-    image2 = serializers.ImageField()
+    image2 = serializers.ImageField(required=False)
     password1 = serializers.CharField(write_only=True)
     password2 = serializers.CharField(write_only=True)
 
