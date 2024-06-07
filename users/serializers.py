@@ -10,8 +10,15 @@ class UserSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = (
             "id", "identification_code", "first_name", "last_name", "role",
-            "is_active", "is_staff", "is_superuser",
+            "is_active", "is_staff", "is_superuser", "image1",
         )
+
+    def to_representation(self, instance):
+        request = self.context["request"]
+        res = super().to_representation(instance)
+        if res["image1"] is not None:
+            res["image1"] = request.build_absolute_uri(res['image1'])
+        return res
 
 
 class LoginSerializer(serializers.Serializer):
