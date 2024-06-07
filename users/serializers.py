@@ -97,4 +97,7 @@ class UsersListSerializer(serializers.ModelSerializer):
             "image1", "role", "status")
 
     def get_status(self, obj):
-        return Transaction.objects.filter(user=obj).last().status
+        obj = Transaction.objects.filter(user=obj)
+        if obj.exists():
+            return obj.last().status
+        return None
