@@ -108,10 +108,14 @@ class ActivityByManagerSerializer(serializers.Serializer):
             created_at__range=(start_date, end_date),
         ).values("sentiment").annotate(count=Count("sentiment"))
 
-        message = {
-            item['sentiment']: item['count'] for item in objects}
+        message = {"Furious": 0, "Neutral": 0,
+                   "Sadness": 0, "Angry": 0, "Happiness": 0, "Delighted": 0}
 
-        return message
+        for item in objects:
+            message[item['sentiment']] = item['count']
+
+        return [message["Furious"], message["Neutral"], message["Sadness"],
+                message["Angry"], message["Happiness"], message["Delighted"]]
 
     def avg_hour_table(self, user_id: int, start_date, end_date, status):
         transactions = Transaction.objects.filter(
