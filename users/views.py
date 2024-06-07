@@ -26,7 +26,7 @@ class Login(APIView):
         if user.check_password(password):
             user.update_login_time()
             message = {
-                "user": UserSerializer(user).data,
+                "user": UserSerializer(user, context={"request": request}).data,
                 "tokens": get_tokens_for_user(user),
             }
             return Response(message, status=status.HTTP_200_OK)
