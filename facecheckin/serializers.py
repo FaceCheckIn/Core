@@ -3,12 +3,15 @@ from .models import Transaction
 from AI.recognition import recognition
 from users.models import CustomUser
 from django.conf import settings
+from facecheckin_backend.settings import env
 from django.core.files.storage import FileSystemStorage
 from django.db.models import Count, F
 from django.db.models.functions import TruncDate
+from django.utils import timezone
 import os
 from .tasks import get_emotion_recognition
 import threading
+from datetime import datetime
 
 
 class CreateTransactionSerializer(serializers.Serializer):
@@ -42,7 +45,8 @@ class CreateTransactionSerializer(serializers.Serializer):
     def create_transaction(self, identification_code: str, status: Transaction.TransactionStatus):
         user = CustomUser.objects.get(identification_code=identification_code)
         status = Transaction.TransactionStatus.ENTER if status == "enter" else Transaction.TransactionStatus.EXIT
-        obj = Transaction.objects.create(user=user, status=status)
+        obj = Transaction.objects.create(
+            user=user, status=status, created_at=timezone.now())
         return "{} {}".format(user.first_name, user.last_name), obj.pk
 
     def recognition_process(self, input_image, employees_images: list, emp_identification_codes: list):
@@ -91,7 +95,7 @@ class CreateTransactionSerializer(serializers.Serializer):
         return result, identification_code
 
 
-class ActivityViewSerializer(serializers.Serializer):
+class ActivityByManagerSerializer(serializers.Serializer):
     user_id = serializers.IntegerField()
     start_date = serializers.DateField()
     end_date = serializers.DateField()
@@ -152,3 +156,37 @@ class ActivityViewSerializer(serializers.Serializer):
             "exit_avg_hour_table": self.avg_hour_table(
                 user_id, start_date, end_date, Transaction.TransactionStatus.EXIT),
         }
+
+
+class ActivityByUserSerializer(serializers.ModelSerializer):
+    delay_penalty = serializers.SerializerMethodField()
+    overtime = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Transaction
+        fields = ("status", "created_at", "delay_penalty", "overtime")
+
+    def get_delay_or_overtime(self, obj, reference_time_key, threshold_key, status_check):
+        if not obj.status == status_check:
+            return None
+
+        reference_time_str = env(reference_time_key)
+        reference_time = datetime.strptime(reference_time_str, "%H:%M").time()
+
+        transaction_time = obj.created_at.time()
+
+        delay = datetime.combine(
+            datetime.min, transaction_time) - datetime.combine(datetime.min, reference_time)
+        delay_minutes = delay.total_seconds() / 60
+
+        if delay_minutes >= env(threshold_key, cast=int):
+            return delay_minutes
+        return 0
+
+    def get_delay_penalty(self, obj):
+        return self.get_delay_or_overtime(
+            obj,  "ENTER_TIME", "PENALTY_THRESHOLD", Transaction.TransactionStatus.ENTER)
+
+    def get_overtime(self, obj):
+        return self.get_delay_or_overtime(
+            obj, "EXIT_TIME", "OVERTIME_THRESHOLD",  Transaction.TransactionStatus.EXIT)
