@@ -3,8 +3,7 @@ from .models import Transaction
 
 
 class TransactionAdmin(admin.ModelAdmin):
-    list_display = ('user', 'sentiment', 'status', 'datetime')
-    readonly_fields = ('user', 'sentiment', 'status', 'datetime')
+    list_display = ('user', 'sentiment', 'status', 'created_at')
 
 
 admin.site.register(Transaction, TransactionAdmin)
