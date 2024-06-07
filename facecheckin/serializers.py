@@ -120,18 +120,19 @@ class ActivityViewSerializer(serializers.Serializer):
             created_at__range=(start_date, end_date),
         )
 
-        times = transactions.annotate(
+        objects = transactions.annotate(
             date=TruncDate("created_at"),
             time=F("created_at")
-        ).values("date", "time")
+        ).values("date", "time", "sentiment")
 
         data = []
-        for time in times:
-            extracted_date = time["date"]
-            extracted_time = time["time"].time()
+        for object in objects:
+            extracted_date = object["date"]
+            extracted_time = object["time"].time()
             data.append({
                 "date": extracted_date,
-                "time": extracted_time
+                "time": extracted_time,
+                "sentiment": object["sentiment"],
             })
 
         return data
