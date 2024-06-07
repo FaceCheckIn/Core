@@ -12,6 +12,7 @@ def main(images):
         em = emotion_recognition(img)
         emotions.append(em)
 
+    print(emotions)
     label_counts = Counter(emotions)
     the_emotion, count = label_counts.most_common(1)[0]
 
