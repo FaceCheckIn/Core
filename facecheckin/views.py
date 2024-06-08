@@ -22,8 +22,11 @@ class CreateTransaction(APIView):
         response = serializer.save()
         message = {
             "status": response[0], "fullname": response[1]}
-        print("Fullname: {} -> {}".format(
-            message["fullname"], serializer.validated_data["status"].capitalize()))
+        if message["status"]:
+            print("Fullname: {} -> {}".format(
+                message["fullname"], serializer.validated_data["status"].capitalize()))
+        else:
+            print("Fullname: {}".format(message["fullname"]))
         return Response(message, status=status.HTTP_201_CREATED)
 
 
