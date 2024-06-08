@@ -12,7 +12,7 @@ import os
 from .tasks import get_emotion_recognition
 import threading
 from datetime import datetime
-from dateutil import tz, parser
+from dateutil import tz
 
 
 class CreateTransactionSerializer(serializers.Serializer):
@@ -125,7 +125,7 @@ class ActivityByManagerSerializer(serializers.Serializer):
             user__pk=user_id,
             status=status,
             created_at__range=(start_date, end_date),
-        )
+        ).order_by("created_at")
 
         objects = transactions.annotate(
             date=TruncDate("created_at"),
@@ -201,5 +201,4 @@ class ActivityByUserSerializer(serializers.ModelSerializer):
         utc_time = datetime.fromtimestamp(created_at_timestamp, tz=tz.UTC)
         iran_time = utc_time.astimezone(iran_tz)
         res["created_at"] = iran_time
-
         return res

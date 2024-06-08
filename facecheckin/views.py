@@ -50,7 +50,7 @@ class ActivityByUser(ListAPIView):
 
     def get_queryset(self):
         queryset = Transaction.objects.filter(
-            user=self.request.user).order_by("-pk")
+            user=self.request.user).order_by("-created_at")
 
         past_days = self.request.query_params.get("past_days", None)
         if past_days:
