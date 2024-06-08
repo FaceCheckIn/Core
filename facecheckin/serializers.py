@@ -12,6 +12,7 @@ import os
 from .tasks import get_emotion_recognition
 import threading
 from datetime import datetime
+from dateutil import tz, parser
 
 
 class CreateTransactionSerializer(serializers.Serializer):
@@ -192,3 +193,13 @@ class ActivityByUserSerializer(serializers.ModelSerializer):
     def get_overtime(self, obj):
         return self.get_delay_or_overtime(
             obj, "EXIT_TIME", "OVERTIME_THRESHOLD",  Transaction.TransactionStatus.EXIT)
+
+    def to_representation(self, instance):
+        res = super().to_representation(instance)
+        iran_tz = tz.gettz('Asia/Tehran')
+        created_at_timestamp = int(res["created_at"])
+        utc_time = datetime.fromtimestamp(created_at_timestamp, tz=tz.UTC)
+        iran_time = utc_time.astimezone(iran_tz)
+        res["created_at"] = iran_time
+
+        return res
