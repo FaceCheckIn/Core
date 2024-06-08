@@ -37,9 +37,11 @@ class CreateTransactionSerializer(serializers.Serializer):
             "identification_code", "image1", "image2")
         for data in employees_data:
             employees_images.append(data.image1.path)
-            employees_images.append(data.image2.path)
-            emp_identification_codes.extend(
-                [data.identification_code, data.identification_code])
+            if data.image2:
+                employees_images.append(data.image2.path)
+                emp_identification_codes.extend([data.identification_code])
+            emp_identification_codes.extend([data.identification_code])
+
         return employees_images, emp_identification_codes
 
     def create_transaction(self, identification_code: str, status: Transaction.TransactionStatus):
